@@ -17,5 +17,6 @@ public class RemoteCallAspect {
         Method targetMethod = pjp.getTarget().getClass().getDeclaredMethod(methodSignature.getName(), methodSignature.getMethod().getParameterTypes());
         RemoteCall annotation = targetMethod.getAnnotation(RemoteCall.class);
         String version = annotation.version();
+
     }
 }

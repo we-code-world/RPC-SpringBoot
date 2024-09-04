@@ -1,9 +1,9 @@
 package com.wangdi.clientstub.rpc;
 
-import com.wangdi.servicecenter.entity.RemoteCallRequest;
+import com.wangdi.servicecenter.entity.RemoteCallResponse;
 import io.netty.channel.*;
 
-public class Client extends SimpleChannelInboundHandler<RemoteCallRequest> {
+public class Client extends SimpleChannelInboundHandler<RemoteCallResponse> {
     private final String host;
     private final int port;
     public Client(String host, String port){
@@ -12,7 +12,7 @@ public class Client extends SimpleChannelInboundHandler<RemoteCallRequest> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, RemoteCallRequest remoteCallRequest) throws Exception {
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, RemoteCallResponse remoteCallResponse) throws Exception {
 
     }
 }

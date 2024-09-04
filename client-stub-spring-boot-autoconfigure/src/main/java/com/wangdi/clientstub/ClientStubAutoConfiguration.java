@@ -10,4 +10,5 @@ import org.springframework.context.annotation.Import;
 public class ClientStubAutoConfiguration {
     @Autowired
     ServiceDiscovery serviceDiscovery;
+
 }
