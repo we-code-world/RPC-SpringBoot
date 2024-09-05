@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 public class ZooKeeperServiceRegistry implements ServiceRegistry {
     Logger logger = LoggerFactory.getLogger(ZooKeeperServiceRegistry.class);
     private final ZkClient zkClient;
-    private ZooKeeperProperties registerCenter;
+    private final ZooKeeperProperties registerCenter;
     public ZooKeeperServiceRegistry(ZooKeeperProperties registerCenter) {
         this.registerCenter = registerCenter;
         zkClient = new ZkClient(registerCenter.getAddress(), registerCenter.getSessionTimeout(), registerCenter.getConnectTimeout());
@@ -24,7 +24,7 @@ public class ZooKeeperServiceRegistry implements ServiceRegistry {
     @Override
     public void register(Service service) {
         // 在 registry 节点下创建 service 持久节点，存放服务名称
-        String servicePath = registerCenter.getZkRegistryPath() + "/" + service.getName() + "/" + service.getVersion();
+        String servicePath = "/" + registerCenter.getZkRegistryPath() + "/" + service.getName() + "/" + service.getVersion();
         if (!zkClient.exists(servicePath)) {
             zkClient.createPersistent(servicePath);
             logger.info("create service node: {}", servicePath);

@@ -12,7 +12,7 @@ public class ZooKeeperProperties extends RegisterCenter {
 
     private int connectTimeout = 1000;
 
-    private String zkRegistryPath = "/registry";
+    private String zkRegistryPath = "registry";
 
     public int getSessionTimeout() {
         return sessionTimeout;

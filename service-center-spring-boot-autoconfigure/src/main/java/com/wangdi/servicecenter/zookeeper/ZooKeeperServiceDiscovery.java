@@ -1,7 +1,6 @@
 package com.wangdi.servicecenter.zookeeper;
 
 import com.wangdi.servicecenter.Service;
-import com.wangdi.servicecenter.ServiceCenterProperties.RegisterCenter;
 import com.wangdi.servicecenter.ServiceDiscovery;
 import org.I0Itec.zkclient.ZkClient;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class ZooKeeperServiceDiscovery implements ServiceDiscovery {
     @Override
     public Service discovery(String name, String version) {
         // 获取 registry 节点下所有 service 持久节点
-        String servicePath = registerCenter.getZkRegistryPath() + "/" + name + "/" + version;
+        String servicePath = "/" + registerCenter.getZkRegistryPath() + "/" + name + "/" + version;
         if (!zkClient.exists(servicePath)) {
             logger.info("no such service: {}({})", name, version);
             return null;
