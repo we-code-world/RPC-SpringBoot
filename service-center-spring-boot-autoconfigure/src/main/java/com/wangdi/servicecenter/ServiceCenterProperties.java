@@ -3,9 +3,11 @@ package com.wangdi.servicecenter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(
-        prefix = "service-center"
+        prefix = "server-center"
 )
 public class ServiceCenterProperties {
+    private RegisterCenter registerCenter;
+
     private String name;
 
     public String getName() {
@@ -14,5 +16,26 @@ public class ServiceCenterProperties {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public RegisterCenter getRegisterCenter() {
+        return registerCenter;
+    }
+
+    public void setRegisterCenter(RegisterCenter registerCenter) {
+        this.registerCenter = registerCenter;
+    }
+
+    public static class RegisterCenter{
+        String address;
+
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
     }
 }

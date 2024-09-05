@@ -1,7 +1,9 @@
 package com.wangdi.serverstub.rpc;
 import com.wangdi.serverstub.ServerProperties;
+import com.wangdi.servicecenter.Service;
 import com.wangdi.servicecenter.ServiceRegistry;
 import com.wangdi.servicecenter.entity.RemoteCallRequest;
+import com.wangdi.servicecenter.entity.RemoteCallResponse;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -21,7 +23,7 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
     private final int bossNum = 1;
     private final int workerNum = 8;
     Logger logger = LoggerFactory.getLogger(Server.class);
-    private Map<String, Object> serviceMap = new HashMap<>();
+    private Map<RemoteCallService, Object> serviceMap = new HashMap<>();
     private final Server self = this;
     // 监听地址
     private final String address;
@@ -37,15 +39,21 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
     }
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RemoteCallRequest remoteCallRequest) throws Exception {
+        RemoteCallResponse response = new RemoteCallResponse();
+        response.setRequestId(remoteCallRequest.getRequestId());
+        try {
 
+        }catch (Exception e){
+            logger.error("handle error", e);
+            response.setException(e);
+        }
+        channelHandlerContext.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error("server caught exception", cause);
         ctx.close();
     }
-
-    public int listen()
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -65,7 +73,13 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
                     channelPipeline.addLast(self);
                 }
             });
-            ChannelFuture channelFuture = serverBootstrap.bind(address, Integer.parseInt(port)).sync();
+            ChannelFuture channelFuture = serverBootstrap.bind(address, port).sync();
+            serviceMap.forEach((key, value) -> {
+                Service service = new Service(key.implementInterface().getName(), key.version(), address, port);
+                serviceRegistry.register(service);
+                logger.info("register service: {} => {}", key, address);
+            });
+
             channelFuture.channel().closeFuture().sync();
         }finally {
             bossGroup.shutdownGracefully();
@@ -75,9 +89,9 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        applicationContext.getBeansWithAnnotation(RemoteCallService.class).entrySet().stream().forEach(entry -> {
-            RemoteCallService annotation = entry.getValue().getClass().getAnnotation(RemoteCallService.class);
-            serviceMap.put(annotation.implementInterface().getName() + "." + annotation.version(), entry.getValue());
+        applicationContext.getBeansWithAnnotation(RemoteCallService.class).forEach((key, value) -> {
+            RemoteCallService annotation = value.getClass().getAnnotation(RemoteCallService.class);
+            serviceMap.put(annotation, value);
         });
     }
 }

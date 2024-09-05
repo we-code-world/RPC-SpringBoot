@@ -17,9 +17,6 @@ public class ProtostuffSerialize implements Serializer {
     private Map<Class<?>, Schema<?>> cachedSchema = new ConcurrentHashMap<>();
     private static final Objenesis objenesis = new ObjenesisStd(true);
 
-    public ProtostuffSerialize(ServiceCenterProperties serviceCenterProperties) {
-    }
-
     @Override
     public <T> byte[] serialize(T obj) {
         Class<T> cls = (Class<T>) obj.getClass();
