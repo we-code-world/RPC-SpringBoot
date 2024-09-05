@@ -1,14 +1,15 @@
 package com.wangdi.servicecenter;
 
+import com.wangdi.servicecenter.zookeeper.ZooKeeperProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(
         prefix = "server-center"
 )
 public class ServiceCenterProperties {
-    private RegisterCenter registerCenter;
+    private RegisterCenter registerCenter = new ZooKeeperProperties();
 
-    private String name;
+    private String name = "center";
 
     public String getName() {
         return name;
@@ -27,8 +28,7 @@ public class ServiceCenterProperties {
     }
 
     public static class RegisterCenter{
-        String address;
-
+        String address = "127.0.0.1:8099";
 
         public String getAddress() {
             return address;

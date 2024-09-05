@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties({ServiceCenterProperties.class, ZooKeeperProperties.class})
+@EnableConfigurationProperties({ZooKeeperProperties.class, ServiceCenterProperties.class})
 public class ServiceCenterAutoConfiguration {
 
     @Bean

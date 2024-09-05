@@ -19,6 +19,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Configuration;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -29,7 +30,6 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
     private final int workerNum = 8;
     Logger logger = LoggerFactory.getLogger(Server.class);
     private Map<String, Object> serviceMap = new HashMap<>();
-    private final Server self = this;
     // 监听地址
     private final String address;
     // 监听端口
@@ -39,10 +39,11 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
 
     private Serializer serializer;
 
-    public Server(ServerProperties serverProperties, ServiceRegistry serviceRegistry) {
+    public Server(ServerProperties serverProperties, ServiceRegistry serviceRegistry, Serializer serializer) {
         this.address = serverProperties.getAddress();
         this.port = serverProperties.getPort();
         this.serviceRegistry = serviceRegistry;
+        this.serializer = serializer;
     }
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RemoteCallRequest remoteCallRequest) throws Exception {
@@ -86,7 +87,7 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
                     ChannelPipeline channelPipeline = socketChannel.pipeline();
                     channelPipeline.addLast(new RemoteDecoder(RemoteCallRequest.class, serializer));
                     channelPipeline.addLast(new RemoteEncoder(RemoteCallResponse.class, serializer));
-                    channelPipeline.addLast(self);
+                    channelPipeline.addLast(Server.this);
                 }
             });
             ChannelFuture channelFuture = serverBootstrap.bind(address, port).sync();
@@ -106,9 +107,6 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        applicationContext.getBeansOfType(Serializer.class).forEach((k, value) -> {
-            if("serializer".equals(k)) serializer = value;
-        });
         applicationContext.getBeansWithAnnotation(RemoteCallService.class).forEach((key, value) -> {
             RemoteCallService annotation = value.getClass().getAnnotation(RemoteCallService.class);
             String serviceVersion = annotation.implementInterface().getName() + "-" + annotation.version();

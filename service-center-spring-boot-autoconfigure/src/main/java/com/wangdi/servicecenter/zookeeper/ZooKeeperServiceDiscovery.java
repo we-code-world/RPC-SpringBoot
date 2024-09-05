@@ -3,6 +3,7 @@ package com.wangdi.servicecenter.zookeeper;
 import com.wangdi.servicecenter.Service;
 import com.wangdi.servicecenter.ServiceDiscovery;
 import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.exception.ZkTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,12 @@ public class ZooKeeperServiceDiscovery implements ServiceDiscovery {
 
     public ZooKeeperServiceDiscovery(ZooKeeperProperties registerCenter){
         this.registerCenter = registerCenter;
-        zkClient = new ZkClient(registerCenter.getAddress(), registerCenter.getSessionTimeout(), registerCenter.getConnectTimeout());
+        try{
+            zkClient = new ZkClient(registerCenter.getAddress(), registerCenter.getSessionTimeout(), registerCenter.getConnectTimeout());
+        }catch (ZkTimeoutException e){
+            logger.error("zookeeper client startup failed", e);
+            throw new RuntimeException("zookeeper client startup timeout", e);
+        }
     }
 
     @Override

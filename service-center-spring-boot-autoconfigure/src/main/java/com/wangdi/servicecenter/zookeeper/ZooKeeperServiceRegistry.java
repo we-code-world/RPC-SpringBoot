@@ -3,6 +3,7 @@ package com.wangdi.servicecenter.zookeeper;
 import com.wangdi.servicecenter.Service;
 import com.wangdi.servicecenter.ServiceRegistry;
 import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.exception.ZkTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,12 +13,17 @@ public class ZooKeeperServiceRegistry implements ServiceRegistry {
     private final ZooKeeperProperties registerCenter;
     public ZooKeeperServiceRegistry(ZooKeeperProperties registerCenter) {
         this.registerCenter = registerCenter;
-        zkClient = new ZkClient(registerCenter.getAddress(), registerCenter.getSessionTimeout(), registerCenter.getConnectTimeout());
-        // 创建 registry 持久节点，该节点下存放所有的 service 节点
-        String registryPath = registerCenter.getZkRegistryPath();
-        if (!zkClient.exists(registryPath)) {
-            zkClient.createPersistent(registryPath);
-            logger.info("create registry node: {}", registryPath);
+        try {
+            zkClient = new ZkClient(registerCenter.getAddress(), registerCenter.getSessionTimeout(), registerCenter.getConnectTimeout());
+            // 创建 registry 持久节点，该节点下存放所有的 service 节点
+            String registryPath = registerCenter.getZkRegistryPath();
+            if (!zkClient.exists(registryPath)) {
+                zkClient.createPersistent(registryPath);
+                logger.info("create registry node: {}", registryPath);
+            }
+        }catch (ZkTimeoutException e){
+            logger.error("zookeeper client startup failed", e);
+            throw new RuntimeException("zookeeper client startup timeout", e);
         }
     }
 

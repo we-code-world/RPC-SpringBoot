@@ -11,7 +11,7 @@ class SampleClientApplicationTests {
     void contextLoads() {
     }
 
-    @RemoteCall
+    @RemoteCall(interfaceName = "")
     String getName(){
         return "";
     }
