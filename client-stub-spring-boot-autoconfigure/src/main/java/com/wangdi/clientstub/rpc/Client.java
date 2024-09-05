@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+@ChannelHandler.Sharable
 public class Client extends SimpleChannelInboundHandler<RemoteCallResponse> {
     private final String host;
     private final int port;
@@ -53,7 +54,7 @@ public class Client extends SimpleChannelInboundHandler<RemoteCallResponse> {
             });
             bootstrap.option(ChannelOption.TCP_NODELAY, true);
         } finally {
-            group.shutdownGracefully();
+            //group.shutdownGracefully();
         }
     }
 

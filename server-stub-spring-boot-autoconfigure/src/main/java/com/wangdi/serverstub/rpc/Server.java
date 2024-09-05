@@ -16,22 +16,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Configuration;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+@ChannelHandler.Sharable
 public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> implements ApplicationContextAware, InitializingBean {
     private final int bossNum = 1;
     private final int workerNum = 8;
     Logger logger = LoggerFactory.getLogger(Server.class);
     private Map<String, Object> serviceMap = new HashMap<>();
     // 监听地址
-    private final String address;
+    private final String host;
     // 监听端口
     private final int port;
     // 服务注册
@@ -40,7 +39,7 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
     private Serializer serializer;
 
     public Server(ServerProperties serverProperties, ServiceRegistry serviceRegistry, Serializer serializer) {
-        this.address = serverProperties.getAddress();
+        this.host = serverProperties.getHost();
         this.port = serverProperties.getPort();
         this.serviceRegistry = serviceRegistry;
         this.serializer = serializer;
@@ -90,13 +89,14 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
                     channelPipeline.addLast(Server.this);
                 }
             });
-            ChannelFuture channelFuture = serverBootstrap.bind(address, port).sync();
+            ChannelFuture channelFuture = serverBootstrap.bind(host, port).sync();
             serviceMap.forEach((key, value) -> {
-                String[] serviceVersion = key.split("-");
+                String[] serviceVersion = new String[1];
+                for (String s: key.split("\\.")) serviceVersion = s.split("-");
                 assert serviceVersion.length == 2;
-                Service service = new Service(serviceVersion[0], serviceVersion[1], address, port);
+                Service service = new Service(serviceVersion[0], serviceVersion[1], host, port);
                 serviceRegistry.register(service);
-                logger.info("register service: {} => {}", key, address);
+                logger.info("register service: {} => {}", key, host);
             });
             channelFuture.channel().closeFuture().sync();
         }finally {
@@ -109,7 +109,10 @@ public class Server extends SimpleChannelInboundHandler<RemoteCallRequest> imple
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         applicationContext.getBeansWithAnnotation(RemoteCallService.class).forEach((key, value) -> {
             RemoteCallService annotation = value.getClass().getAnnotation(RemoteCallService.class);
-            String serviceVersion = annotation.implementInterface().getName() + "-" + annotation.version();
+            // 这里实现有点问题，不能使用全类名有点难搞
+            String serviceName = annotation.implementInterface().getName();
+            for (String s: serviceName.split("\\.")) serviceName = s;
+            String serviceVersion = serviceName + "-" + annotation.version();
             serviceMap.put(serviceVersion, value);
         });
     }

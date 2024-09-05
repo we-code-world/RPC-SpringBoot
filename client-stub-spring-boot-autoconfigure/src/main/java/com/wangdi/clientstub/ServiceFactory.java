@@ -34,11 +34,16 @@ public class ServiceFactory {
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             RemoteCallRequest request = new RemoteCallRequest();
             request.setRequestId(UUID.randomUUID().toString());
+            request.setMethodName(method.getName());
+            request.setParameters(args);
+            request.setParameterTypes(method.getParameterTypes());
             return client.doCall(request);
         }
     }
     public <T> T create(final Class<T> interfaceClass, final String version){
-        String interfaceName = interfaceClass.getName();
+        String interfaceName = null;
+        for (String s: interfaceClass.getName().split("\\.")) interfaceName = s;
+        if (interfaceName == null) throw new IllegalArgumentException("the interface class is illegal");
         String clientName = interfaceName + "-" + version;
         Client client = clientMap.getOrDefault(clientName, null);
         if(client == null)

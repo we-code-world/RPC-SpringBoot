@@ -9,6 +9,6 @@ import org.springframework.stereotype.Controller;
 public class HelloServiceImpl implements HelloService{
     @Override
     public String hello(String name) {
-        return "impl hello";
+        return "impl hello " + name;
     }
 }

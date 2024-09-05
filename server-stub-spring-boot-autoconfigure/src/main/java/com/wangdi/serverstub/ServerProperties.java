@@ -6,25 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
         prefix = "service-center"
 )
 public class ServerProperties {
-    private String name;
-    private int port;
-    private String address;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    private int port=8022;
+    private String host = "127.0.0.1";
 
     public int getPort() {
         return port;
@@ -32,5 +15,13 @@ public class ServerProperties {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
     }
 }

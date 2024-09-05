@@ -28,6 +28,7 @@ public class ZooKeeperServiceDiscovery implements ServiceDiscovery {
 
     @Override
     public String loadBalancing(List<String> addresses) {
+        if(addresses.isEmpty()) return null;
         return addresses.get(ThreadLocalRandom.current().nextInt(addresses.size()));
     }
 
@@ -42,6 +43,7 @@ public class ZooKeeperServiceDiscovery implements ServiceDiscovery {
         // 在 service 节点下查找 address 临时节点
         List<String> addressList = zkClient.getChildren(servicePath);
         String address = loadBalancing(addressList);
+        if(address == null) throw new RuntimeException("no such service provider: " + name);
         logger.info("get address node: {}", address);
         String[] addressArray = address.split(":");
         assert addressArray.length == 2;
