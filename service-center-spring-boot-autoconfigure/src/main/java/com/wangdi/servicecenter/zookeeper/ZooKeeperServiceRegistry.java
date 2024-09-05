@@ -31,6 +31,6 @@ public class ZooKeeperServiceRegistry implements ServiceRegistry {
         }
         // 在 service 节点下创建 address 临时节点,存放服务地址
         zkClient.createEphemeral(servicePath + "/" + service.getAddress() + ":" + service.getPort());
-        logger.info("create address node: {}", addressNode);
+        logger.info("create address node: {}", service.getAddress() + ":" + service.getPort());
     }
 }
